@@ -1,0 +1,9 @@
+name: add_text
+
+entry_points:
+    main:
+        parameters:
+            # upstream: 入力フォルダを指定。s3のパスも使える。
+            upstream: {type: path, default: "./"}
+        command: 
+            python src/main.py --upstream {upstream}

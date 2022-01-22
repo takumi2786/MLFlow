@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+  mlflow:
+    build: ./mlflow/
+    image: mlflow
+    ports:
+      - 5000:5000
+    restart: always
+    depends_on:
+      - mysql
+      - minio
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+    command: mlflow server --backend-store-uri 'mysql://${MYSQL_USER}:${MYSQL_PASS}@mysql:3306/mlflowdb' --default-artifact-root 's3://default/' --host 0.0.0.0 --port 5000
+    volumes:
+      - /mnt/data/mlflow:/var/mlflow
+    networks:
+      - nginx_network
+
+  mysql:
+    build: ./mysql/
+    volumes:
+      - ./mysql/db:/docker-entrypoint-initdb.d  #初期データをマウントする場所
+    image: mlflow-mysql # イメージの名前
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: mlflowdb
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASS}
+    ports:
+      - "127.0.0.1:3306:3306"
+    networks:
+      - nginx_network
+
+  minio:
+    image: minio/minio:RELEASE.2021-08-25T00-41-18Z
+    restart: always
+    volumes: 
+     - /mnt/data/minio:/export # minioのデータを配置するディレクトリを指定
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command:  ['server', '/export', '--console-address', ':9001']
+    ports:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001
+    networks:
+      - nginx_network
+
+  defaultbucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}) do echo 'try to create buckets...' && sleep 1; done;
+      /usr/bin/mc mb myminio/default;
+      /usr/bin/mc policy download myminio/default;
+      exit 0;
+      "
+    networks:
+      - nginx_network
+
+networks:
+  nginx_network:
+    driver: bridge
+

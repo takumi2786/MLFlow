@@ -1,0 +1,6 @@
+name: main
+
+entry_points:
+    main:
+        command: |
+            python main.py
