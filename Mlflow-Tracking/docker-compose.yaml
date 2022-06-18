@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mlflow:
-    build: ./mlflow/
+    build: ./docker/mlflow/
     image: mlflow
     ports:
       - 5000:5000
@@ -21,7 +21,7 @@ services:
       - nginx_network
 
   mysql:
-    build: ./mysql/
+    build: ./docker/mysql/
     volumes:
       - ./mysql/db:/docker-entrypoint-initdb.d  #初期データをマウントする場所
     image: mlflow-mysql # イメージの名前
