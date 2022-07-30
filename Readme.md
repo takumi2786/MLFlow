@@ -39,3 +39,14 @@ cd examples/training/pytorch-model
 pip install -r requirement.txt
 python train.py
 ```
+
+
+<!-- ## モデルをデプロイ
+```bash
+MLFLOW_CONDA_HOME=PATH_TO_CONDA_COMMAND #~/.pyenv/versions/anaconda3-2021.05/condabin/conda
+AWS_ACCESS_KEY_ID=minio
+AWS_SECRET_ACCESS_KEY=password
+MLFLOW_S3_ENDPOINT_URL=http://127.0.0.1:9000
+
+mlflow models serve -m models:/mnist-pytorch/latest
+``` -->

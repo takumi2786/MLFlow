@@ -101,7 +101,7 @@ trainer = pl.Trainer(max_epochs=10, progress_bar_refresh_rate=20, gpus=1)
 mlflow.pytorch.autolog()
 
 # Train the model
-with mlflow.start_run() as run:
+with mlflow.start_run(experiment_id=1) as run:
     trainer.fit(mnist_model, train_loader)
 
 # fetch the auto logged parameters and metrics

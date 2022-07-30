@@ -23,7 +23,7 @@ os.environ["AWS_SECRET_ACCESS_KEY"] = "password"
 os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://127.0.0.1:9000"
 
 # 実験の試行を開始
-with mlflow.start_run(run_name="sample training") as run:
+with mlflow.start_run(run_name="sample training", experiment_id=0) as run:
     mlflow.log_params({
         "version": 1.0,
         "hoge": "huga"
