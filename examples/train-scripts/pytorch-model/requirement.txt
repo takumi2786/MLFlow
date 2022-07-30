@@ -1,0 +1,7 @@
+mlflow
+torch
+torchvision
+pytorch_lightning
+opencv-python
+matplotlib
+numpy

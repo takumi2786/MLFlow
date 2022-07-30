@@ -36,7 +36,7 @@ services:
       - nginx_network
 
   minio:
-    image: minio/minio:RELEASE.2021-08-25T00-41-18Z
+    image: minio/minio:latest
     restart: always
     volumes: 
      - ${MOUNT_PATH}/minio:/export # minioのデータを配置するディレクトリを指定
@@ -51,7 +51,7 @@ services:
       - nginx_network
 
   defaultbucket:
-    image: minio/mc
+    image: minio/mc:latest
     depends_on:
       - minio
     entrypoint: >
