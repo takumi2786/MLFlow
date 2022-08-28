@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-cluster-ip
+  namespace: mlflow
+spec:
+  type: ClusterIP
+  ports:
+  - name: "http-port"
+    protocol: "TCP"
+    port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  namespace: mlflow
+  labels:
+    app: mysql
+spec:
+  containers:
+    - name: mysql
+      image: "mysql:5.7"
+      env:
+      - name: MYSQL_ROOT_PASSWORD
+        value: pass
+      - name: MYSQL_DATABASE
+        value: mlflowdb
+      - name: MYSQL_USER
+        value: mlflow
+      - name: MYSQL_PASSWORD
+        value: pass
+      ports:
+        - containerPort: 3306
+          name: mysql
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1000Mi
+        limits:
+          cpu: 500m
+          memory: 1000Mi
+      volumeMounts:
+        # 設定ファイル
+        - name: mysql-server-conf
+          mountPath: /etc/mysql/conf.d
+        # ストレージ
+        - name: mlflow-mysql
+          mountPath: /var/lib/mysql      
+  volumes:
+    - name: mysql-server-conf
+      configMap:
+        name: mysql-server-conf-config
+    - name: mlflow-mysql
+      persistentVolumeClaim:
+        claimName: mlflow-mysql
+---
+# mysqlが利用する永続化ストレージ
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-mysql
+  namespace: mlflow
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# mlflowの設定ファイルをConfigMapとして作成する
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-server-conf-config
+data:
+  custom.cnf: |
+    [mysqld]
+    character-set-server=utf8mb4
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlflow-server
+  namespace: mlflow
+  labels:
+    app: mlflow-server
+spec:
+  containers:
+    - name: mlflow-server
+      image: "takumi2786/mlflow"
+      env:
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: minio-service.kubeflow.svc.cluster.local # minioはkubeflowのものを使う
+        - name: AWS_ACCESS_KEY_ID
+          value: minio
+        - name: AWS_SECRET_ACCESS_KEY
+          value: minio123
+        - name: MYSQL_HOST
+          value: mysql-cluster-ip.mlflow.svc.cluster.local
+      command: ["mlflow", "server", "--backend-store-uri", "mysql://mlflow:pass@$(MYSQL_HOST):3306/mlflowdb", "--default-artifact-root", "s3://default/", "--host", "0.0.0.0", "--port", "5000"]
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 500Mi
+        limits:
+          cpu: 1000m
+          memory: 500Mi
+      ports:
+        - containerPort: 5000
+          name: mlflow

@@ -21,10 +21,9 @@ services:
       - nginx_network
 
   mysql:
-    build: ./docker/mysql/
     volumes:
-      - ./mysql/db:/docker-entrypoint-initdb.d  #初期データをマウントする場所
-    image: mlflow-mysql # イメージの名前
+      - ./storage/mysql/db:/docker-entrypoint-initdb.d  #初期データをマウントする場所
+    image: mysql:5.7 # イメージの名前
     environment:
       MYSQL_ROOT_PASSWORD: pass
       MYSQL_DATABASE: mlflowdb

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: disabled
+    kubernetes.io/metadata.name: mysqls
+  name: mlflow

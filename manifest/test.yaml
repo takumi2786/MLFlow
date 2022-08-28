@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server
+spec:
+  selector:
+    matchLabels:
+      app: mysql-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql-server
+    spec:
+      containers:
+        - image: mysql:5.7
+          name: mysql
+          resources:
+          env:
+            - name: MYSQL_USER
+              value: devuser
+            - name: MYSQL_PASSWORD
+              value: devuser
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+            - name: LANG
+              value: C.UTF-8
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-server-initdb
+              mountPath: /docker-entrypoint-initdb.d
+            - name: mysql-server-conf
+              mountPath: /etc/mysql/conf.d
+      volumes:
+        - name: mysql-server-initdb
+          configMap:
+            name: mysql-server-initdb-config
+        - name: mysql-server-conf
+          configMap:
+            name: mysql-server-conf-config
