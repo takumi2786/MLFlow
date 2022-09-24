@@ -7,9 +7,11 @@ mysql/build:
 mysql/push: mysql/build
 	docker push ${IMAGE_MYSQL}
 
-
 mlflow/build:
 	docker build -f docker/mlflow/Dockerfile ./docker/mlflow -t ${IMAGE_MLFLOW}
 
 mlflow/push: mlflow/build
 	docker push ${IMAGE_MLFLOW}
+
+mlflow/deploy: mlflow/push
+	kubectl apply -f ./manifest/mlflow

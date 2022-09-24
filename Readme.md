@@ -5,7 +5,6 @@ MLflow Trackingサーバーのデプロイスクリプト
 
 ## Docker-ComposeでMLflowサーバを構築
 
-
 ```bash
 cd mlflow-server
 docker-compose up -d
@@ -26,11 +25,15 @@ alias minio="aws --profile minio --endpoint-url http://127.0.0.1:9000/ s3"
 # 一覧
 alias
 
-# 使ってみる
+# 利用例
 minio ls 
 minio cp hoge.txt s3://mlflow-artifact-strage
 ```
 
+## k8s上にデプロイ
+```bash
+make mlflow/deploy
+```
 
 ## 学習スクリプトのサンプルを実行
 以下のスクリプトを実行すると、mnistの分類モデルの学習が実行されます。
