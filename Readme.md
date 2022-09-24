@@ -1,5 +1,5 @@
 ## 概要
-MLflow Trackingサーバーの構築例。
+MLflow Trackingサーバーのデプロイスクリプト
 
 
 
